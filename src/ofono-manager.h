@@ -20,6 +20,7 @@ struct _modem_changed
 typedef struct _modem_changed modem_changed;
 
 gboolean ofono_manager_modems_register(ofono_notify_fn cb, gpointer user_data);
+gboolean ofono_manager_get_modems_sync(void);
 GHashTable *ofono_manager_get_modems(void);
 void ofono_manager_modems_close(ofono_notify_fn cb, gpointer user_data);
 

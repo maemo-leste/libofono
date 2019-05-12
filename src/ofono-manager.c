@@ -260,6 +260,7 @@ static void
 ofono_manager_get_modems_cb(DBusPendingCall *pending, void *user_data)
 {
   DBusMessage *reply;
+  gboolean success = FALSE;
 
   OFONO_ENTER
 
@@ -282,6 +283,7 @@ ofono_manager_get_modems_cb(DBusPendingCall *pending, void *user_data)
         DBusMessageIter array_iter;
 
         dbus_message_iter_recurse(&iter, &array_iter);
+        success = TRUE;
 
         while (dbus_message_iter_get_arg_type(&array_iter) == DBUS_TYPE_STRUCT)
         {
@@ -292,6 +294,7 @@ ofono_manager_get_modems_cb(DBusPendingCall *pending, void *user_data)
           if (!ofono_manager_add_modem(&struct_iter))
           {
             OFONO_WARN("Cannot add modem while processing GetModems reply");
+            success = FALSE;
             break;
           }
 
@@ -306,6 +309,9 @@ ofono_manager_get_modems_cb(DBusPendingCall *pending, void *user_data)
 
     dbus_message_unref(reply);
   }
+
+  if (user_data)
+    *(gboolean *)user_data = success;
 
   OFONO_EXIT
 }
@@ -386,7 +392,7 @@ ofono_manager_modems_remove_dbus_filter()
 }
 
 static gboolean
-ofono_manager_modems_init()
+ofono_manager_modems_init(DBusPendingCallNotifyFunction cb, gpointer user_data)
 {
   DBusMessage *message;
   gboolean rv = FALSE;
@@ -400,13 +406,10 @@ ofono_manager_modems_init()
 
   if (message)
   {
-    if (icd_dbus_send_system_mcall(message, -1, ofono_manager_get_modems_cb,
-                                   NULL))
-    {
-      rv = TRUE;
-    }
-    else
+    if (!icd_dbus_send_system_mcall(message, -1, cb, user_data))
       OFONO_ERR("could not send 'GetModems' message");
+    else
+      rv = TRUE;
 
     dbus_message_unref(message);
   }
@@ -424,6 +427,41 @@ ofono_manager_get_modems(void)
   return modems;
 }
 
+static void
+ofono_manager_get_modems_sync_cb(DBusPendingCall *pending, void *user_data)
+{
+  gint *finished = user_data;
+  gboolean success = FALSE;
+
+  ofono_manager_get_modems_cb(pending, &success);
+
+  if (success)
+    *finished = 1;
+  else
+    *finished = -1;
+}
+
+gboolean
+ofono_manager_get_modems_sync(void)
+{
+  gint finished = 0;
+  gboolean rv = FALSE;
+
+  if (ofono_manager_modems_init(ofono_manager_get_modems_sync_cb, &finished))
+  {
+    do
+    {
+      g_main_context_iteration(NULL, TRUE);
+    }
+    while (!finished);
+
+    if (finished == 1)
+      rv = TRUE;
+  }
+
+  return rv;
+}
+
 gboolean
 ofono_manager_modems_register(ofono_notify_fn cb, gpointer user_data)
 {
@@ -433,7 +471,7 @@ ofono_manager_modems_register(ofono_notify_fn cb, gpointer user_data)
   {
     modems = modem_list_create();
 
-    if ((rv = ofono_manager_modems_init()))
+    if ((rv = ofono_manager_modems_init(ofono_manager_get_modems_cb, NULL)))
         rv = ofono_manager_modems_add_dbus_filter();
   }
 
