@@ -131,7 +131,8 @@ modem_free(modem *modem)
 void
 modem_list_free(GHashTable *modems)
 {
-  g_hash_table_remove_all(modems);
+  if (modems)
+    g_hash_table_destroy(modems);
 }
 
 void
