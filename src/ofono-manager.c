@@ -450,7 +450,23 @@ ofono_manager_modems_close(ofono_notify_fn cb, gpointer user_data)
 
   if (!notifiers)
   {
+    GHashTableIter iter;
+    gpointer p, q;
+
     ofono_manager_modems_remove_dbus_filter();
+
+    g_hash_table_iter_init (&iter, modems);
+
+    while (g_hash_table_iter_next (&iter, &p, &q))
+    {
+      const gchar *path = p;
+      modem *m = q;
+
+      ofono_modem_close(path, ofono_modem_property_change_cb, m);
+      ofono_sim_close(path, ofono_sim_property_change_cb, m);
+      ofono_net_close(path, ofono_net_property_change_cb, m);
+    }
+
     modem_list_free(modems);
     modems = NULL;
   }
