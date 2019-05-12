@@ -1,0 +1,3 @@
+usr/lib/*/libofono.so
+usr/include/libofono
+usr/lib/*/pkgconfig/libofono.pc

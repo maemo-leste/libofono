@@ -1,0 +1,23 @@
+Source: libofono
+Section: libs
+Priority: optional
+Maintainer: Ivaylo Dimitrov <ivo.g.dimitrov.75@gmail.com>
+Build-Depends: debhelper (>= 9), cdbs, libtool-bin, autoconf, automake, pkg-config, libglib2.0-dev, libdbus-1-dev, icd2-dev, ofono-dev
+Standards-Version: 3.8.0
+
+Package: libofono
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}
+Multi-Arch: same
+Description: Ofono DBUS interfaces C wrapper
+ This package a wrapper library for various ofono interfaces
+
+Package: libofono-dev
+Section: libdevel
+Priority: optional
+Architecture: any
+Depends: libofono (= ${binary:Version})
+Description: libofono development files
+ This package contains the files needed for developing applications that
+ use libofono.
