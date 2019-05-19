@@ -11,6 +11,7 @@ libofono_la_SOURCES = \
 	notifier.c \
 	dbus-helpers.c \
 	modem.c \
+	ofono-conn.c \
 	ofono-net.c \
 	ofono-sim.c \
 	ofono-modem.c \
