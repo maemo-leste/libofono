@@ -19,12 +19,12 @@ struct _modem_changed
 
 typedef struct _modem_changed modem_changed;
 
+typedef void (*ofono_property_set_fn)(gboolean success, gpointer user_data);
+
 gboolean ofono_manager_modems_register(ofono_notify_fn cb, gpointer user_data);
 gboolean ofono_manager_get_modems_sync(void);
 GHashTable *ofono_manager_get_modems(void);
 void ofono_manager_modems_close(ofono_notify_fn cb, gpointer user_data);
 
-typedef void (*ofono_manager_modem_set_fn)(gboolean success, gpointer user_data);
-
-gboolean ofono_manager_modem_set_power(const gchar *path, dbus_bool_t on, ofono_manager_modem_set_fn cb, gpointer user_data);
-gboolean ofono_manager_modem_set_online(const char *path, dbus_bool_t on, ofono_manager_modem_set_fn cb, gpointer user_data);
+gboolean ofono_manager_modem_set_power(const gchar *path, dbus_bool_t on, ofono_property_set_fn cb, gpointer user_data);
+gboolean ofono_manager_modem_set_online(const char *path, dbus_bool_t on, ofono_property_set_fn cb, gpointer user_data);

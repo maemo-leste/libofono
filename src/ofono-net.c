@@ -21,7 +21,6 @@ ofono_net_notifier_notify(const char *path, gpointer data)
     ofono_notifier_notify(notifiers, data);
 }
 
-
 static gboolean
 ofono_net_property_changed(const char *path, DBusMessageIter *iter)
 {
